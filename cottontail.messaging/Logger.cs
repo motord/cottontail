@@ -1,9 +1,8 @@
 using System;
-using EasyNetQ;
 
 namespace cottontail.messaging
 {
-    public class Logger : IEasyNetQLogger
+    public class Logger
     {
         public event EventHandler<MessengerEventArgs> Log;
 
