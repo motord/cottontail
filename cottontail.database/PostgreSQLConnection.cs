@@ -25,6 +25,7 @@ namespace cottontail.database
       database = ""{5}""
     }";
 		private const string pattern=@"(.*){\s*host\s*=\s*""(.*)"",\s*port\s*=\s*(.*),\s*username\s*=\s*""(.*)"",\s*password\s*=\s*""(.*)"",\s*database\s*=\s*""(.*)""\s*}";
+		private int browserSize;
 
 		public PostgreSQLConnection (LuaTable lt)
 		{
@@ -39,7 +40,7 @@ namespace cottontail.database
 			dbcon.Open ();
 		}
 		
-		public PostgreSQLConnection (Artifact a)
+		public PostgreSQLConnection (Artifact a, int size=100)
 		{
 			StreamReader reader = new StreamReader(a.Path);
 			Match match=Regex.Match(reader.ReadToEnd(), pattern, RegexOptions.IgnoreCase);
@@ -52,6 +53,7 @@ namespace cottontail.database
 			                                        host, port, username, password, database);
 			dbcon = new NpgsqlConnection (connectionString);
 			dbcon.Open ();
+			browserSize=size;
 		}
 
 		public void Execute (string sql, LuaTable lt)
@@ -118,6 +120,20 @@ namespace cottontail.database
 			dbcmd.Dispose ();
 			dbcmd = null;
 			return rowCount;
+		}
+		
+		public DataTable Browse(Artifact a)
+		{
+			IDbCommand dbcmd = dbcon.CreateCommand ();
+			dbcmd.CommandText = String.Format("SELECT * FROM {0} LIMIT {1}", a.Path, browserSize);
+			IDataReader reader = dbcmd.ExecuteReader ();
+			DataTable dt=new DataTable();
+			dt.Load(reader);
+			reader.Close ();
+			reader = null;
+			dbcmd.Dispose ();
+			dbcmd = null;
+			return dt;
 		}
 		
 		public string Template

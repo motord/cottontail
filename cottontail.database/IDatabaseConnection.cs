@@ -12,11 +12,13 @@ namespace cottontail.database
 	{
 		void Execute (string sql, LuaTable lt);
 			
-		List<Artifact> Views();
+		List<Artifact> Views ();
 		
-		List<Artifact> Tables();
+		List<Artifact> Tables ();
 		
-		int RowCount(Artifact a);
+		int RowCount (Artifact a);
+		
+		DataTable Browse (Artifact a);
 
 	}
 }
