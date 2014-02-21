@@ -55,14 +55,15 @@ import('cottontail.messaging', 'cottontail.messaging')";
 				switch (dbcon.Extension) {
 				case ".postgresql":
 					lua.DoString (String.Format (postgreSQLTemplate, dbcon.ToString ()));
+					lua.DoFile (dbcon.Path);
 					break;
 				case ".sqlite":				
 					lua.DoString (String.Format (sqliteTemplate, dbcon.ToString ()));
+					lua.DoString(String.Format("{0}{{1}}", dbcon.ToString(), dbcon.Path));
 					break;
 				default:
 					break;
 				}
-				lua.DoFile (dbcon.Path);
 			}
 			foreach (Artifact template in project.Templates) {
 				lua.DoString (String.Format (templateTemplate, template.ToString (), template.Path));

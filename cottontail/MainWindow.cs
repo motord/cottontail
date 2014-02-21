@@ -1,14 +1,19 @@
 using System;
 using System.Linq;
+using System.Text;
+using System.Collections.Generic;
+using System.Data;
 using Gtk;
 using cottontail.scripting;
 using cottontail.projects;
 using cottontail.messaging;
 using cottontail.database;
+using cottontail.widgets;
 
 public partial class MainWindow: Gtk.Window
 {	
 	private Project project;
+	private StringBuilder logBuilder=new StringBuilder(1048576);
 	
 	public MainWindow (): base (Gtk.WindowType.Toplevel)
 	{
@@ -45,13 +50,17 @@ public partial class MainWindow: Gtk.Window
 
 	protected void OnLog (object sender, LuaRuntimeEventArgs e)
 	{
-		textviewLog.Buffer.Text += e.Message + Environment.NewLine;
+		logBuilder.Append(e.Message);
+		logBuilder.Append(Environment.NewLine);
+		textviewLog.Buffer.Text =logBuilder.ToString();
 		textviewLog.ScrollToIter (textviewLog.Buffer.EndIter, 0, true, 0, 0);
 	}
 	
 	protected void OnLog (object sender, MessengerEventArgs e)
 	{
-		textviewLog.Buffer.Text += e.Message + Environment.NewLine;
+		logBuilder.Append(e.Message);
+		logBuilder.Append(Environment.NewLine);
+		textviewLog.Buffer.Text =logBuilder.ToString();
 		textviewLog.ScrollToIter (textviewLog.Buffer.EndIter, 0, true, 0, 0);
 	}
 
@@ -209,5 +218,57 @@ public partial class MainWindow: Gtk.Window
 	{
 		Application.Quit ();
 		args.RetVal = true;
+	}
+
+	protected void OnTreeviewProjectRowActivated (object o, Gtk.RowActivatedArgs args)
+	{
+		Gtk.TreeModel model = treeviewProject.Model;
+		TreeIter iter;
+		model.GetIter (out iter, args.Path);
+		Artifact a = (Artifact)model.GetValue (iter, 0);
+		switch (a.Category) {
+		case Category.Folder:
+			break;
+		case Category.DBConnection:
+			break;
+		case Category.Table:
+		case Category.View:
+			args.Path.Up ();
+			args.Path.Up ();
+			model.GetIter (out iter, args.Path);
+			Artifact dbcon = (Artifact)model.GetValue (iter, 0);
+			IDatabaseConnection database;
+			switch (dbcon.Extension) {
+			case ".postgresql":
+				database = new PostgreSQLConnection (dbcon);
+				break;
+			case ".sqlite":				
+				database = new SQLiteConnection (dbcon);
+				break;
+			default:
+				break;
+			}
+			DataGrid grid=new DataGrid();
+			grid.DataSource=database.Browse (a);;
+			grid.TotalRecords=database.RowCount (a);
+			grid.DataBind();
+			Label label=new Label(a.ToString());
+			TabLabel tabLabel=new TabLabel(label, new Gtk.Image());
+			notebook.AppendPage(grid, label);
+			notebook.ShowAll ();
+			notebook.Page = notebook.NPages -1;
+			database.Dispose();
+			break;
+		case Category.Template:
+			break;
+		case Category.Script:
+			break;
+		case Category.Messenger:
+			break;
+		case Category.Library:
+			break;
+		default:
+			break;
+		}
 	}
 }

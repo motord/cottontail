@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>10.0.0</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{7AED0C45-96B5-40B9-9578-8C4A2AE7C58D}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>cottontail.widgets</RootNamespace>
+    <AssemblyName>cottontail.widgets</AssemblyName>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug</OutputPath>
+    <DefineConstants>DEBUG;</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <ConsolePause>false</ConsolePause>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>none</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Release</OutputPath>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <ConsolePause>false</ConsolePause>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="gtk-sharp, Version=2.12.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f">
+      <Package>gtk-sharp-2.0</Package>
+    </Reference>
+    <Reference Include="gdk-sharp, Version=2.12.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f">
+      <Package>gtk-sharp-2.0</Package>
+    </Reference>
+    <Reference Include="Mono.Posix" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AssemblyInfo.cs" />
+    <Compile Include="gtk-gui\generated.cs" />
+    <Compile Include="gtk-gui\cottontail.widgets.DataGrid.cs" />
+    <Compile Include="DataGrid\DataGrid.cs" />
+    <Compile Include="DataGrid\DataGridColumn.cs" />
+    <Compile Include="DataGrid\Renderers\BlobContentRenderer.cs" />
+    <Compile Include="DataGrid\Renderers\BooleanContentRenderer.cs" />
+    <Compile Include="DataGrid\Renderers\ByteContentRenderer.cs" />
+    <Compile Include="DataGrid\Renderers\DecimalContentRenderer.cs" />
+    <Compile Include="DataGrid\Renderers\DoubleContentRenderer.cs" />
+    <Compile Include="DataGrid\Renderers\FloatContentRenderer.cs" />
+    <Compile Include="DataGrid\Renderers\IDataGridContentRenderer.cs" />
+    <Compile Include="DataGrid\Renderers\IntegerContentRenderer.cs" />
+    <Compile Include="DataGrid\Renderers\LongContentRenderer.cs" />
+    <Compile Include="DataGrid\Renderers\NullContentRenderer.cs" />
+    <Compile Include="DataGrid\Renderers\ObjectContentRenderer.cs" />
+    <Compile Include="DataGrid\Renderers\StringContentRenderer.cs" />
+    <Compile Include="TabLabel.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <ItemGroup>
+    <EmbeddedResource Include="gtk-gui\gui.stetic">
+      <LogicalName>gui.stetic</LogicalName>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="DataGrid\" />
+  </ItemGroup>
+</Project>

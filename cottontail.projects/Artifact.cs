@@ -26,6 +26,10 @@ namespace cottontail.projects
 		public string Extension {
 			get { return System.IO.Path.GetExtension(path);}	
 		}
+		
+		public Category Category{
+			get {return category;}
+		}
 	}
 }
 

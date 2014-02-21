@@ -12,47 +12,23 @@ namespace cottontail.database
 {
 	public class SQLiteConnection : IDatabaseConnection
 	{
-		private string host;
-		private int port;
-		private string username;
-		private string password;
 		private string database;
 		private	IDbConnection dbcon;
-		private const string template = @"{0}{
-      host = ""{1}"",
-      port = {2},
-      username = ""{3}"",
-      password = ""{4}"",
-      database = ""{5}""
-    }";
-		private const string pattern = @"(.*){\s*host\s*=\s*""(.*)"",\s*port\s*=\s*(.*),\s*username\s*=\s*""(.*)"",\s*password\s*=\s*""(.*)"",\s*database\s*=\s*""(.*)""\s*}";
 		private int browserSize;
 
 		public SQLiteConnection (LuaTable lt)
 		{
-			host = (string)lt ["host"];
-			port = Convert.ToInt16(lt ["port"]);
-			username = (string)lt ["username"];
-			password = (string)lt ["password"];
-			database = (string)lt ["database"];
-			string connectionString = String.Format ("Server={0};Port={1};Database={4};User ID={2};Password={3};", 
-			                                        host, port, username, password, database);
-			dbcon = new NpgsqlConnection (connectionString);
+			database = (string)lt [1];
+			string connectionString = String.Format ("Data Source={0};Version=3;", database);
+			dbcon = new SqliteConnection (connectionString);
 			dbcon.Open ();
 		}
 		
 		public SQLiteConnection (Artifact a, int size=100)
 		{
-			StreamReader reader = new StreamReader (a.Path);
-			Match match = Regex.Match (reader.ReadToEnd (), pattern, RegexOptions.IgnoreCase);
-			host = match.Groups [2].Value;
-			port = Int16.Parse (match.Groups [3].Value);
-			username = match.Groups [4].Value;
-			password = match.Groups [5].Value;
-			database = match.Groups [6].Value;
-			string connectionString = String.Format ("Server={0};Port={1};Database={4};User ID={2};Password={3};", 
-			                                        host, port, username, password, database);
-			dbcon = new NpgsqlConnection (connectionString);
+			database = a.Path;
+			string connectionString = String.Format ("Data Source={0};Version=3;", database);
+			dbcon = new SqliteConnection (connectionString);
 			dbcon.Open ();
 			browserSize=size;
 		}
@@ -78,7 +54,7 @@ namespace cottontail.database
 		public List<Artifact> Views ()
 		{
 			IDbCommand dbcmd = dbcon.CreateCommand ();
-			dbcmd.CommandText = "SELECT table_name FROM INFORMATION_SCHEMA.views WHERE table_schema = ANY (current_schemas(false))";
+			dbcmd.CommandText = "SELECT name FROM sqlite_master WHERE type='view';";
 			IDataReader reader = dbcmd.ExecuteReader ();
 			List<Artifact> views = new List<Artifact> ();
 			while (reader.Read()) {
@@ -95,7 +71,7 @@ namespace cottontail.database
 		public List<Artifact> Tables ()
 		{
 			IDbCommand dbcmd = dbcon.CreateCommand ();
-			dbcmd.CommandText = "SELECT table_name FROM INFORMATION_SCHEMA.tables WHERE table_schema = ANY (current_schemas(false))";
+			dbcmd.CommandText = "SELECT name FROM sqlite_master WHERE type='table';";
 			IDataReader reader = dbcmd.ExecuteReader ();
 			List<Artifact> tables = new List<Artifact> ();
 			while (reader.Read()) {
@@ -135,14 +111,6 @@ namespace cottontail.database
 			dbcmd.Dispose ();
 			dbcmd = null;
 			return dt;
-		}
-
-		public string Template {
-			get { return template;}	
-		}
-		
-		public string Pattern {
-			get { return pattern;}
 		}
 
 		#region IDisposable implementation
