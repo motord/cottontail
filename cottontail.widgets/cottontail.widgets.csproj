@@ -59,14 +59,44 @@
     <Compile Include="DataGrid\Renderers\ObjectContentRenderer.cs" />
     <Compile Include="DataGrid\Renderers\StringContentRenderer.cs" />
     <Compile Include="TabLabel.cs" />
+    <Compile Include="editors\ExchangeEditor.cs" />
+    <Compile Include="gtk-gui\cottontail.widgets.ExchangeEditor.cs" />
+    <Compile Include="editors\DatabaseEditor.cs" />
+    <Compile Include="gtk-gui\cottontail.widgets.DatabaseEditor.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
     <EmbeddedResource Include="gtk-gui\gui.stetic">
       <LogicalName>gui.stetic</LogicalName>
     </EmbeddedResource>
+    <EmbeddedResource Include="icons\MonoDevelop.Close.png" />
+    <EmbeddedResource Include="icons\library.png" />
+    <EmbeddedResource Include="icons\lua.png" />
+    <EmbeddedResource Include="icons\messenger.png" />
+    <EmbeddedResource Include="icons\table.png" />
+    <EmbeddedResource Include="icons\view.png" />
+    <EmbeddedResource Include="icons\database.png">
+      <DeployService-UseProjectRelativePath>true</DeployService-UseProjectRelativePath>
+    </EmbeddedResource>
+    <EmbeddedResource Include="icons\template.png" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="DataGrid\" />
+    <Folder Include="editors\" />
+    <Folder Include="icons\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\cottontail.projects\cottontail.projects.csproj">
+      <Project>{40FBFEB2-211A-46A3-8486-8AE477207F82}</Project>
+      <Name>cottontail.projects</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\cottontail.database\cottontail.database.csproj">
+      <Project>{00FF6C80-5044-455B-98A7-DED0FE622C79}</Project>
+      <Name>cottontail.database</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\cottontail.messaging\cottontail.messaging.csproj">
+      <Project>{70BC94EA-F5F2-442A-8A52-7F99FE999088}</Project>
+      <Name>cottontail.messaging</Name>
+    </ProjectReference>
   </ItemGroup>
 </Project>

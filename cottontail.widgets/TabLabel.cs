@@ -3,11 +3,11 @@
 //          Jacob Ilsø Christensen <jacobilsoe@gmail.com>
 // License: LGPL
 //
-
 using System;
 using System.Drawing;
 using Gtk;
 using Gdk;
+using cottontail.projects;
 
 namespace cottontail.widgets
 {
@@ -17,11 +17,25 @@ namespace cottontail.widgets
 		private Gtk.Image icon;
 		private EventBox titleBox;
 		private static Gdk.Pixbuf closeImage;
+		private static Gdk.Pixbuf databaseIcon;
+		private static Gdk.Pixbuf tableIcon;
+		private static Gdk.Pixbuf viewIcon;
+		private static Gdk.Pixbuf messengerIcon;
+		private static Gdk.Pixbuf scriptIcon;
+		private static Gdk.Pixbuf templateIcon;
+		private static Gdk.Pixbuf libraryIcon;
 		
 		static TabLabel ()
 		{
 			try {
-				closeImage = Gdk.Pixbuf.LoadFromResource ("MonoDevelop.Close.png");
+				closeImage = Gdk.Pixbuf.LoadFromResource ("cottontail.widgets.icons.MonoDevelop.Close.png");
+				databaseIcon = Gdk.Pixbuf.LoadFromResource ("cottontail.widgets.icons.database.png");
+				tableIcon = Gdk.Pixbuf.LoadFromResource ("cottontail.widgets.icons.table.png");
+				viewIcon = Gdk.Pixbuf.LoadFromResource ("cottontail.widgets.icons.view.png");
+				messengerIcon = Gdk.Pixbuf.LoadFromResource ("cottontail.widgets.icons.messenger.png");
+				scriptIcon = Gdk.Pixbuf.LoadFromResource ("cottontail.widgets.icons.lua.png");
+				templateIcon = Gdk.Pixbuf.LoadFromResource ("cottontail.widgets.icons.template.png");
+				libraryIcon = Gdk.Pixbuf.LoadFromResource ("cottontail.widgets.icons.library.png");
 			} catch (Exception e) {
 //				MonoDevelop.Core.LoggingService.LogError ("Can't create pixbuf from resource: MonoDevelop.Close.png", e);
 			}
@@ -31,10 +45,39 @@ namespace cottontail.widgets
 		{
 		}
 
-		public TabLabel (Label label, Gtk.Image icon) : base (false, 0)
+		public TabLabel (Artifact a) : base (false, 0)
 		{	
+			Label label = new Label ();
+			label.Text = a.ToString ();
 			this.title = label;
-			this.icon = icon;
+			switch (a.Category) {
+			case Category.Folder:
+				return;
+				break;
+			case Category.DBConnection:
+				this.icon = new Gtk.Image (databaseIcon);
+				break;
+			case Category.Table:
+				this.icon = new Gtk.Image (tableIcon);
+				break;
+			case Category.View:
+				this.icon = new Gtk.Image (viewIcon);
+				break;
+			case Category.Messenger:
+				this.icon = new Gtk.Image (messengerIcon);
+				break;
+			case Category.Script:
+				this.icon = new Gtk.Image (scriptIcon);
+				break;
+			case Category.Template:
+				this.icon = new Gtk.Image (templateIcon);
+				break;
+			case Category.Library:
+				this.icon = new Gtk.Image (libraryIcon);
+				break;
+			default:
+				break;
+			}
 			icon.Xpad = 2;
 			
 			EventBox eventBox = new EventBox ();
@@ -57,7 +100,7 @@ namespace cottontail.widgets
 			button.Image = closeIcon;
 			button.Relief = ReliefStyle.None;
 			button.BorderWidth = 0;
-			button.Clicked += new EventHandler(ButtonClicked);
+			button.Clicked += new EventHandler (ButtonClicked);
 			button.Name = "MonoDevelop.TabLabel.CloseButton";
 			this.PackStart (button, false, true, 0);
 			this.ClearFlag (WidgetFlags.CanFocus);
@@ -66,14 +109,12 @@ namespace cottontail.widgets
 			this.ShowAll ();
 		}
 		
-		public Label Label
-		{
+		public Label Label {
 			get { return title; }
 			set { title = value; }
 		}
 		
-		public Gtk.Image Icon
-		{
+		public Gtk.Image Icon {
 			get { return icon; }
 			set { icon = value; }
 		}
@@ -87,20 +128,18 @@ namespace cottontail.widgets
 		
 		protected override bool OnButtonReleaseEvent (EventButton evnt)
 		{
-			if (evnt.Button == 2 && CloseClicked != null)
-			{
-				CloseClicked(this, null);
+			if (evnt.Button == 2 && CloseClicked != null) {
+				CloseClicked (this, null);
 				return true;
 			}
 							
 			return false;
 		}
 							
-		private void ButtonClicked(object o, EventArgs eventArgs)
+		private void ButtonClicked (object o, EventArgs eventArgs)
 		{
-			if (CloseClicked != null)
-			{
-				CloseClicked(this, null);				
+			if (CloseClicked != null) {
+				CloseClicked (this, null);				
 			}
 		}
 	}

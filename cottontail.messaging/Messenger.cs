@@ -17,6 +17,61 @@ namespace cottontail.messaging
 		private string exchange;
 		private string username;
 		private string password;
+
+		public string Exchange {
+			get {
+				return this.exchange;
+			}
+			set {
+				exchange = value;
+			}
+		}
+
+		public string Host {
+			get {
+				return this.host;
+			}
+			set {
+				host = value;
+			}
+		}
+
+		public string Password {
+			get {
+				return this.password;
+			}
+			set {
+				password = value;
+			}
+		}
+
+		public int Port {
+			get {
+				return this.port;
+			}
+			set {
+				port = value;
+			}
+		}
+
+		public string Username {
+			get {
+				return this.username;
+			}
+			set {
+				username = value;
+			}
+		}
+
+		public string Virtualhost {
+			get {
+				return this.virtualhost;
+			}
+			set {
+				virtualhost = value;
+			}
+		}
+
 		private readonly ConnectionFactory factory;
 		private readonly IConnection connection;
 		private readonly IModel channel;

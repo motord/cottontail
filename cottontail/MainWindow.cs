@@ -3,7 +3,9 @@ using System.Linq;
 using System.Text;
 using System.Collections.Generic;
 using System.Data;
+using System.IO;
 using Gtk;
+using cottontail;
 using cottontail.scripting;
 using cottontail.projects;
 using cottontail.messaging;
@@ -13,14 +15,22 @@ using cottontail.widgets;
 public partial class MainWindow: Gtk.Window
 {	
 	private Project project;
-	private StringBuilder logBuilder=new StringBuilder(1048576);
+	private StringBuilder logBuilder = new StringBuilder (1048576);
+	private Artifact currentArtifact;
+	private Dictionary<int, Artifact> pageArtifacts = new Dictionary<int, Artifact> ();
+
+	public event EventHandler<ArtifactEventArgs> ArtifactEvent;
 	
 	public MainWindow (): base (Gtk.WindowType.Toplevel)
 	{
 		Build ();
 		InitializeTreeView ();
+		toolbar.GetNthItem (2).Sensitive = false;
+		toolbar.GetNthItem (3).Sensitive = false;
+		toolbar.GetNthItem (7).Sensitive = false;
+		this.ArtifactEvent += OnArtifactEvent;
 	}
-	
+
 	protected void OnAddDatabase (object sender, System.EventArgs e)
 	{
 		throw new System.NotImplementedException ();
@@ -41,26 +51,38 @@ public partial class MainWindow: Gtk.Window
 		using (LuaRuntime runtime=new LuaRuntime(project)) {
 			runtime.Log += OnLog;
 			Messenger.logger.Log += OnLog;
-			Artifact script = project.Scripts.ToArray () [0];
+			Artifact script = currentArtifact;
 			runtime.Execute (script);
 			runtime.Log -= OnLog;
 			Messenger.logger.Log -= OnLog;
 		}
 	}
+	
+	protected void OnArtifactEvent (object sender, ArtifactEventArgs e)
+	{
+		currentArtifact = e.CurrentArtifact;
+		if (currentArtifact.Category == Category.Script) {
+			toolbar.GetNthItem (7).Sensitive = true;
+		}
+		if (e.Modified) {
+			toolbar.GetNthItem (2).Sensitive = true;
+			toolbar.GetNthItem (3).Sensitive = true;
+		}
+	}
 
 	protected void OnLog (object sender, LuaRuntimeEventArgs e)
 	{
-		logBuilder.Append(e.Message);
-		logBuilder.Append(Environment.NewLine);
-		textviewLog.Buffer.Text =logBuilder.ToString();
+		logBuilder.Append (e.Message);
+		logBuilder.Append (Environment.NewLine);
+		textviewLog.Buffer.Text = logBuilder.ToString ();
 		textviewLog.ScrollToIter (textviewLog.Buffer.EndIter, 0, true, 0, 0);
 	}
 	
 	protected void OnLog (object sender, MessengerEventArgs e)
 	{
-		logBuilder.Append(e.Message);
-		logBuilder.Append(Environment.NewLine);
-		textviewLog.Buffer.Text =logBuilder.ToString();
+		logBuilder.Append (e.Message);
+		logBuilder.Append (Environment.NewLine);
+		textviewLog.Buffer.Text = logBuilder.ToString ();
 		textviewLog.ScrollToIter (textviewLog.Buffer.EndIter, 0, true, 0, 0);
 	}
 
@@ -211,6 +233,7 @@ public partial class MainWindow: Gtk.Window
 
 	protected void OnQuit (object sender, System.EventArgs e)
 	{
+		this.ArtifactEvent += OnArtifactEvent;
 		Application.Quit ();
 	}
 
@@ -226,10 +249,26 @@ public partial class MainWindow: Gtk.Window
 		TreeIter iter;
 		model.GetIter (out iter, args.Path);
 		Artifact a = (Artifact)model.GetValue (iter, 0);
+		ArtifactEventArgs e = new ArtifactEventArgs ();
+		e.CurrentArtifact = a;
+		ArtifactEvent (this, e);
+		TabLabel tabLabel = new TabLabel (a);
+		int index = -1;
 		switch (a.Category) {
 		case Category.Folder:
+			return;
 			break;
 		case Category.DBConnection:
+			switch (a.Extension) {
+			case ".postgresql":
+				DatabaseEditor deditor = new DatabaseEditor (a);
+				index = notebook.AppendPage (deditor, tabLabel);
+				pageArtifacts.Add (index, a);
+				break;
+			case ".sqlite":
+			default:
+				break;
+			}
 			break;
 		case Category.Table:
 		case Category.View:
@@ -248,27 +287,43 @@ public partial class MainWindow: Gtk.Window
 			default:
 				break;
 			}
-			DataGrid grid=new DataGrid();
-			grid.DataSource=database.Browse (a);;
-			grid.TotalRecords=database.RowCount (a);
-			grid.DataBind();
-			Label label=new Label(a.ToString());
-			TabLabel tabLabel=new TabLabel(label, new Gtk.Image());
-			notebook.AppendPage(grid, label);
-			notebook.ShowAll ();
-			notebook.Page = notebook.NPages -1;
-			database.Dispose();
+			DataGrid grid = new DataGrid ();
+			grid.DataSource = database.Browse (a);
+			grid.TotalRecords = database.RowCount (a);
+			grid.DataBind ();
+			index = notebook.AppendPage (grid, tabLabel);
+			pageArtifacts.Add (index, a);
+			database.Dispose ();
 			break;
 		case Category.Template:
-			break;
 		case Category.Script:
+		case Category.Library:
+			TextView editor = new TextView ();
+			editor.Buffer.Text = new StreamReader (a.Path).ReadToEnd ();
+			ScrolledWindow scroller = new ScrolledWindow ();
+			scroller.Add (editor);
+			index = notebook.AppendPage (scroller, tabLabel);
+			pageArtifacts.Add (index, a);
 			break;
 		case Category.Messenger:
-			break;
-		case Category.Library:
+			ExchangeEditor xeditor = new ExchangeEditor (a);
+			index = notebook.AppendPage (xeditor, tabLabel);
+			pageArtifacts.Add (index, a);
 			break;
 		default:
 			break;
+		}
+		notebook.ShowAll ();
+		notebook.Page = notebook.NPages - 1;
+	}
+
+	protected void OnNotebookSwitchPage (object o, Gtk.SwitchPageArgs args)
+	{
+		if (notebook.NPages == 1) {
+		} else {
+			ArtifactEventArgs e = new ArtifactEventArgs ();
+			e.CurrentArtifact = pageArtifacts [Convert.ToInt16 (args.PageNum)];
+			ArtifactEvent (this, e);
 		}
 	}
 }

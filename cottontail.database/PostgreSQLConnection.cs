@@ -16,6 +16,52 @@ namespace cottontail.database
 		private string username;
 		private string password;
 		private string database;
+
+		public string Database {
+			get {
+				return this.database;
+			}
+			set {
+				database = value;
+			}
+		}
+
+		public string Host {
+			get {
+				return this.host;
+			}
+			set {
+				host = value;
+			}
+		}
+
+		public string Password {
+			get {
+				return this.password;
+			}
+			set {
+				password = value;
+			}
+		}
+
+		public int Port {
+			get {
+				return this.port;
+			}
+			set {
+				port = value;
+			}
+		}
+
+		public string Username {
+			get {
+				return this.username;
+			}
+			set {
+				username = value;
+			}
+		}
+
 		private	IDbConnection dbcon;
 		private const string template=@"{0}{
       host = ""{1}"",
