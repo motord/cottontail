@@ -10,12 +10,13 @@ namespace cottontail.widgets
 		public DatabaseEditor (Artifact a)
 		{
 			this.Build ();
-			PostgreSQLConnection con=new PostgreSQLConnection(a);
-			entryHost.Text=con.Host;
-			entryPort.Text=Convert.ToString(con.Port);
-			entryUsername.Text=con.Username;
-			entryPassword.Text=con.Password;
-			entryDatabase.Text=con.Database;
+			using (PostgreSQLConnection con=new PostgreSQLConnection(a)) {
+				entryHost.Text = con.Host;
+				entryPort.Text = Convert.ToString (con.Port);
+				entryUsername.Text = con.Username;
+				entryPassword.Text = con.Password;
+				entryDatabase.Text = con.Database;
+			}
 		}
 	}
 }

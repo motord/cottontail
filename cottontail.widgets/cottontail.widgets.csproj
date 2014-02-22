@@ -63,6 +63,7 @@
     <Compile Include="gtk-gui\cottontail.widgets.ExchangeEditor.cs" />
     <Compile Include="editors\DatabaseEditor.cs" />
     <Compile Include="gtk-gui\cottontail.widgets.DatabaseEditor.cs" />
+    <Compile Include="gtk-gui\cottontail.widgets.TabLabel.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

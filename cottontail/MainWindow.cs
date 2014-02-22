@@ -63,6 +63,8 @@ public partial class MainWindow: Gtk.Window
 		currentArtifact = e.CurrentArtifact;
 		if (currentArtifact.Category == Category.Script) {
 			toolbar.GetNthItem (7).Sensitive = true;
+		}else{
+			toolbar.GetNthItem (7).Sensitive = false;
 		}
 		if (e.Modified) {
 			toolbar.GetNthItem (2).Sensitive = true;
