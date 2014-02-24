@@ -21,17 +21,23 @@ import('cottontail.messaging', 'cottontail.messaging')";
 		private const string messengerTemplate = @"function {0}(m) {0}= Messenger(m) end";
 		private const string postgreSQLTemplate = @"function {0}(m) {0}= PostgreSQLConnection(m) end";
 		private const string sqliteTemplate = @"function {0}(m) {0}= SQLiteConnection(m) end";
-
+		private const string libraryTemplate = @"{0}=dofile('{1}')";
+		
 		public LuaRuntime (Project p)
 		{
 			lua.LoadCLRPackage ();
 			lua.DoString (packages);
 			lua.RegisterFunction ("print", this, GetType ().GetMethod ("Print"));
-			lua.RegisterFunction ("printTable", this, GetType ().GetMethod ("PrintTable"));
 			lua.DebugHook += HandleLuaDebugHook;
 			lua.HookException += HandleLuaHookException;
 			project = p;
 			StreamReader reader = new StreamReader (System.Reflection.Assembly.GetExecutingAssembly ().GetManifestResourceStream ("cottontail.scripting.lutem.lua"));
+			lua.DoString (reader.ReadToEnd ());
+			reader = new StreamReader (System.Reflection.Assembly.GetExecutingAssembly ().GetManifestResourceStream ("cottontail.scripting.inspect.lua"));
+			lua.DoString (reader.ReadToEnd ());
+			reader = new StreamReader (System.Reflection.Assembly.GetExecutingAssembly ().GetManifestResourceStream ("cottontail.scripting.uuid.lua"));
+			lua.DoString (reader.ReadToEnd ());
+			reader = new StreamReader (System.Reflection.Assembly.GetExecutingAssembly ().GetManifestResourceStream ("cottontail.scripting.date.lua"));
 			lua.DoString (reader.ReadToEnd ());
 		}
 
@@ -59,7 +65,7 @@ import('cottontail.messaging', 'cottontail.messaging')";
 					break;
 				case ".sqlite":				
 					lua.DoString (String.Format (sqliteTemplate, dbcon.ToString ()));
-					lua.DoString(String.Format("{0}{{1}}", dbcon.ToString(), dbcon.Path));
+					lua.DoString(String.Format("{0}{{'{1}'}}", dbcon.ToString(), dbcon.Path));
 					break;
 				default:
 					break;
@@ -69,7 +75,7 @@ import('cottontail.messaging', 'cottontail.messaging')";
 				lua.DoString (String.Format (templateTemplate, template.ToString (), template.Path));
 			}
 			foreach (Artifact library in project.Libraries) {
-				lua.DoFile (library.Path);
+				lua.DoString (String.Format(libraryTemplate, library.ToString(), library.Path));
 			}
 			lua.DoFile (script.Path);
 			foreach (Artifact messenger in project.Messengers) {
@@ -95,23 +101,6 @@ import('cottontail.messaging', 'cottontail.messaging')";
 			args.Message = string.Format ("LUA> {0}", msg);
 			if (Log != null)
 				Log (this, args);
-		}
-
-		public void PrintTable (LuaTable table)
-		{
-			PrintTableInternal (table, 0);
-		}
-
-		private void PrintTableInternal (LuaTable table, int indent)
-		{
-			foreach (DictionaryEntry entry in table) {
-				Print (string.Format ("{0}{1} -> {2}", new string ('\t', indent), entry.Key, entry.Value));
-
-				var childTable = entry.Value as LuaTable;
-				if (childTable != null) {
-					PrintTableInternal (childTable, ++indent);
-				}
-			}
 		}
 	}
 }
